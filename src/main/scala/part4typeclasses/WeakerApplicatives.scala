@@ -13,8 +13,8 @@ object WeakerApplicatives {
     // TODO
     def mapN[A, B, C](tuple: (W[A], W[B]))(f: (A, B) => C): W[C] = {
       val tupleWrapper = product(tuple._1, tuple._2) // W[(A, B)]
-      map(tupleWrapper) {
-        case (a, b) => f(a, b)
+      map(tupleWrapper) { case (a, b) =>
+        f(a, b)
       }
     }
 
@@ -35,7 +35,5 @@ object WeakerApplicatives {
   val optionOfTuple = tupleOfOptions.tupled // Some((1,2,3))
   val sumOption = tupleOfOptions.mapN(_ + _ + _) // Some(6)
 
-  def main(args: Array[String]): Unit = {
-
-  }
+  def main(args: Array[String]): Unit = {}
 }

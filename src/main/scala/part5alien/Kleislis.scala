@@ -4,7 +4,8 @@ import cats.data.Reader
 
 object Kleislis {
 
-  val func1: Int => Option[String] = x => if (x % 2 == 0) Some(s"$x is even") else None
+  val func1: Int => Option[String] = x =>
+    if (x % 2 == 0) Some(s"$x is even") else None
   val func2: Int => Option[Int] = x => Some(x * 3)
 
   // val func3 = func2 andThen func1

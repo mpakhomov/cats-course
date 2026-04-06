@@ -10,9 +10,15 @@ object Writers {
   // 1 - define them at the start
   val aWriter: Writer[List[String], Int] = Writer(List("Started something"), 45)
   // 2 - manipulate them with pure FP
-  val anIncreasedWriter = aWriter.map(_ + 1) // value increases, logs stay the same
-  val aLogsWriter = aWriter.mapWritten(_ :+ "found something interesting") // value stays the same, logs change
-  val aWriterWithBoth = aWriter.bimap(_ :+ "found something interesting", _ + 1) // both value and logs change
+  val anIncreasedWriter =
+    aWriter.map(_ + 1) // value increases, logs stay the same
+  val aLogsWriter = aWriter.mapWritten(
+    _ :+ "found something interesting"
+  ) // value stays the same, logs change
+  val aWriterWithBoth = aWriter.bimap(
+    _ :+ "found something interesting",
+    _ + 1
+  ) // both value and logs change
   val aWriterWithBoth2 = aWriter.mapBoth { (logs, value) =>
     (logs :+ "found something interesting", value + 1)
   }
@@ -64,16 +70,18 @@ object Writers {
 
   def sumWithLogs(n: Int): Writer[Vector[String], Int] = {
     if (n <= 0) Writer(Vector(), 0)
-    else for {
-      _ <- Writer(Vector(s"Now at $n"), n)
-      lowerSum <- sumWithLogs(n - 1)
-      _ <- Writer(Vector(s"Computed sum(${n - 1}) = $lowerSum"), n)
-    } yield lowerSum + n
+    else
+      for {
+        _ <- Writer(Vector(s"Now at $n"), n)
+        lowerSum <- sumWithLogs(n - 1)
+        _ <- Writer(Vector(s"Computed sum(${n - 1}) = $lowerSum"), n)
+      } yield lowerSum + n
   }
 
   // Benefit #2: Writers can keep logs separate on multiple threads
 
-  implicit val ec: ExecutionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(8))
+  implicit val ec: ExecutionContext =
+    ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(8))
 
   def main(args: Array[String]): Unit = {
     println(compositeWriter.run)

@@ -8,24 +8,44 @@ object Readers {
     - an HTTP layer
     - a business logic layer
    */
-  case class Configuration(dbUsername: String, dbPassword: String, host: String, port: Int, nThreads: Int, emailReplyTo: String)
+  case class Configuration(
+      dbUsername: String,
+      dbPassword: String,
+      host: String,
+      port: Int,
+      nThreads: Int,
+      emailReplyTo: String
+  )
   case class DbConnection(username: String, password: String) {
-    def getOrderStatus(orderId: Long): String = "dispatched" // select * from the db table and return the status of the orderID
-    def getLastOrderId(username: String): Long = 542643 // select max(orderId) from table where username = username
+    def getOrderStatus(orderId: Long): String =
+      "dispatched" // select * from the db table and return the status of the orderID
+    def getLastOrderId(username: String): Long =
+      542643 // select max(orderId) from table where username = username
   }
   case class HttpService(host: String, port: Int) {
-    def start(): Unit = println("server started") // this would start the actual server
+    def start(): Unit = println(
+      "server started"
+    ) // this would start the actual server
   }
 
   // bootstrap
-  val config = Configuration("daniel", "rockthejvm1!", "localhost", 1234, 8, "daniel@rockthejvm.com")
+  val config = Configuration(
+    "daniel",
+    "rockthejvm1!",
+    "localhost",
+    1234,
+    8,
+    "daniel@rockthejvm.com"
+  )
   // cats Reader
   import cats.data.Reader
-  val dbReader: Reader[Configuration, DbConnection] = Reader(conf => DbConnection(conf.dbUsername, conf.dbPassword))
+  val dbReader: Reader[Configuration, DbConnection] =
+    Reader(conf => DbConnection(conf.dbUsername, conf.dbPassword))
   val dbConn = dbReader.run(config)
 
   // Reader[I, O]
-  val danielsOrderStatusReader: Reader[Configuration, String] = dbReader.map(dbcon => dbcon.getOrderStatus(55))
+  val danielsOrderStatusReader: Reader[Configuration, String] =
+    dbReader.map(dbcon => dbcon.getOrderStatus(55))
   val danielsOrderStatus: String = danielsOrderStatusReader.run(config)
 
   def getLastOrderStatus(username: String): String = {
@@ -51,19 +71,24 @@ object Readers {
    */
 
   case class EmailService(emailReplyTo: String) {
-    def sendEmail(address: String, contents: String) = s"From: $emailReplyTo; to: $address >>> $contents"
+    def sendEmail(address: String, contents: String) =
+      s"From: $emailReplyTo; to: $address >>> $contents"
   }
 
   // TODO 1 - email a user
   def emailUser(username: String, userEmail: String): String = {
     // fetch the status of their last order
     // email them with the Email service: "Your last order has the status: (status)"
-    val emailServiceReader: Reader[Configuration, EmailService] = Reader(conf => EmailService(conf.emailReplyTo))
+    val emailServiceReader: Reader[Configuration, EmailService] =
+      Reader(conf => EmailService(conf.emailReplyTo))
     val emailReader: Reader[Configuration, String] = for {
       lastOrderId <- dbReader.map(_.getLastOrderId(username))
       orderStatus <- dbReader.map(_.getOrderStatus(lastOrderId))
       emailService <- emailServiceReader
-    } yield emailService.sendEmail(userEmail, s"Your last order has the status: $orderStatus")
+    } yield emailService.sendEmail(
+      userEmail,
+      s"Your last order has the status: $orderStatus"
+    )
 
     emailReader.run(config)
   }

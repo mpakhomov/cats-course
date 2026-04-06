@@ -7,10 +7,11 @@ import scala.concurrent.{ExecutionContext, Future}
 object Monads {
 
   // lists
-  val numbersList = List(1,2,3)
+  val numbersList = List(1, 2, 3)
   val charsList = List('a', 'b', 'c')
   // TODO 1.1: how do you create all combinations of (number, char)?
-  val combinationsList: List[(Int, Char)] = numbersList.flatMap(n => charsList.map(c => (n, c)))
+  val combinationsList: List[(Int, Char)] =
+    numbersList.flatMap(n => charsList.map(c => (n, c)))
   val combinationsListFor = for {
     n <- numbersList
     c <- charsList
@@ -27,7 +28,8 @@ object Monads {
   } yield (n, c)
 
   // futures
-  implicit val ec: ExecutionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(8))
+  implicit val ec: ExecutionContext =
+    ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(8))
   val numberFuture = Future(42)
   val charFuture = Future('Z')
   // TODO 1.3: how do you create the combination of (number, char)?
@@ -56,31 +58,46 @@ object Monads {
   import cats.instances.option._ // implicit Monad[Option]
   val optionMonad = Monad[Option]
   val anOption = optionMonad.pure(4) // Option(4) == Some(4)
-  val aTransformedOption = optionMonad.flatMap(anOption)(x => if (x % 3 == 0) Some(x + 1) else None) // None
+  val aTransformedOption = optionMonad.flatMap(anOption)(x =>
+    if (x % 3 == 0) Some(x + 1) else None
+  ) // None
 
   import cats.instances.list._
   val listMonad = Monad[List]
   val aList = listMonad.pure(3) // List(3)
-  val aTransformedList = listMonad.flatMap(aList)(x => List(x, x + 1)) // List(4, 5)
+  val aTransformedList =
+    listMonad.flatMap(aList)(x => List(x, x + 1)) // List(4, 5)
 
   // TODO 2: use a Monad[Future]
   import cats.instances.future._
   val futureMonad = Monad[Future] // requires an implicit ExecutionContext
   val aFuture = futureMonad.pure(43)
-  val aTransformedFuture = futureMonad.flatMap(aFuture)(x => Future(x + 44)) // future that will end up with a Success(87)
+  val aTransformedFuture = futureMonad.flatMap(aFuture)(x =>
+    Future(x + 44)
+  ) // future that will end up with a Success(87)
 
   // specialized API
-  def getPairsList(numbers: List[Int], chars: List[Char]): List[(Int, Char)] = numbers.flatMap(n => chars.map(c => (n, c)))
-  def getPairsOption(number: Option[Int], char: Option[Char]): Option[(Int, Char)] = number.flatMap(n => char.map(c => (n, c)))
-  def getPairsFuture(number: Future[Int], char: Future[Char]): Future[(Int, Char)] = number.flatMap(n => char.map(c => (n, c)))
+  def getPairsList(numbers: List[Int], chars: List[Char]): List[(Int, Char)] =
+    numbers.flatMap(n => chars.map(c => (n, c)))
+  def getPairsOption(
+      number: Option[Int],
+      char: Option[Char]
+  ): Option[(Int, Char)] = number.flatMap(n => char.map(c => (n, c)))
+  def getPairsFuture(
+      number: Future[Int],
+      char: Future[Char]
+  ): Future[(Int, Char)] = number.flatMap(n => char.map(c => (n, c)))
 
   // generalize
-  def getPairs[M[_], A, B](ma: M[A], mb: M[B])(implicit monad: Monad[M]): M[(A, B)] =
+  def getPairs[M[_], A, B](ma: M[A], mb: M[B])(implicit
+      monad: Monad[M]
+  ): M[(A, B)] =
     monad.flatMap(ma)(a => monad.map(mb)(b => (a, b)))
 
   // extension methods - weirder imports - pure, flatMap
   import cats.syntax.applicative._ // pure is here
-  val oneOption = 1.pure[Option] // implicit Monad[Option] will be used => Some(1)
+  val oneOption =
+    1.pure[Option] // implicit Monad[Option] will be used => Some(1)
   val oneList = 1.pure[List] // List(1)
 
   import cats.syntax.flatMap._ // flatMap is here
@@ -98,7 +115,7 @@ object Monads {
   } yield one + two
 
   // TODO 4: implement a shorter version of getPairs using for-comprehensions
-  def getPairsFor[M[_] : Monad, A, B](ma: M[A], mb: M[B]): M[(A, B)] =
+  def getPairsFor[M[_]: Monad, A, B](ma: M[A], mb: M[B]): M[(A, B)] =
     for {
       a <- ma
       b <- mb

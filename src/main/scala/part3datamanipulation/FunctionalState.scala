@@ -5,7 +5,8 @@ object FunctionalState {
   type MyState[S, A] = S => (S, A)
 
   import cats.data.State
-  val countAndSay: State[Int, String] = State(currentCount => (currentCount + 1, s"Counted $currentCount"))
+  val countAndSay: State[Int, String] =
+    State(currentCount => (currentCount + 1, s"Counted $currentCount"))
   val (eleven, counted10) = countAndSay.run(10).value
   // state = "iterative" computations
 
@@ -17,11 +18,14 @@ object FunctionalState {
   val secondComputation = s"Multiplied with 5, obtained $a"
 
   // pure FP with states
-  val firstTransformation = State((s: Int) => (s + 1, s"Added 1 to 10, obtained ${s + 1}"))
-  val secondTransformation = State((s: Int) => (s * 5, s"Multiplied with 5, obtained ${s * 5}"))
-  val compositeTransformation: State[Int, (String, String)] = firstTransformation.flatMap { firstResult =>
-    secondTransformation.map(secondResult => (firstResult, secondResult))
-  }
+  val firstTransformation =
+    State((s: Int) => (s + 1, s"Added 1 to 10, obtained ${s + 1}"))
+  val secondTransformation =
+    State((s: Int) => (s * 5, s"Multiplied with 5, obtained ${s * 5}"))
+  val compositeTransformation: State[Int, (String, String)] =
+    firstTransformation.flatMap { firstResult =>
+      secondTransformation.map(secondResult => (firstResult, secondResult))
+    }
   val compositeTransformation2 = for {
     firstResult <- firstTransformation
     secondResult <- secondTransformation
@@ -30,15 +34,16 @@ object FunctionalState {
   // function composition is clunky
   val func1 = (s: Int) => (s + 1, s"Added 1 to 10, obtained ${s + 1}")
   val func2 = (s: Int) => (s * 5, s"Multiplied with 5, obtained ${s * 5}")
-  val compositeFunc = func1.andThen {
-    case (newState, firstResult) => (firstResult, func2(newState))
+  val compositeFunc = func1.andThen { case (newState, firstResult) =>
+    (firstResult, func2(newState))
   }
 
   // TODO 1: an online store
   case class ShoppingCart(items: List[String], total: Double)
-  def addToCart(item: String, price: Double): State[ShoppingCart, Double] = State { cart =>
-    (ShoppingCart(item :: cart.items, cart.total + price), price + cart.total)
-  }
+  def addToCart(item: String, price: Double): State[ShoppingCart, Double] =
+    State { cart =>
+      (ShoppingCart(item :: cart.items, cart.total + price), price + cart.total)
+    }
 
   val danielsCart: State[ShoppingCart, Double] = for {
     _ <- addToCart("Fender guitar", 500)

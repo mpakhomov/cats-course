@@ -27,7 +27,10 @@ object ContravariantFunctors {
   }
 
   // problem: given Format[MyType], can we have a Format[Option[MyType]]?
-  implicit def getOptionFormat[T](implicit f: Format[T], m: Monoid[T]): Format[Option[T]] =
+  implicit def getOptionFormat[T](implicit
+      f: Format[T],
+      m: Monoid[T]
+  ): Format[Option[T]] =
     f.contramap[Option[T]](_.getOrElse(m.empty))
 
   /*
@@ -56,7 +59,8 @@ object ContravariantFunctors {
   import cats.Show
   import cats.instances.int._ // implicit Show[Int]
   val showInts = Show[Int]
-  val showOption: Show[Option[Int]] = Contravariant[Show].contramap(showInts)(_.getOrElse(0))
+  val showOption: Show[Option[Int]] =
+    Contravariant[Show].contramap(showInts)(_.getOrElse(0))
 
   import cats.syntax.contravariant._
   val showOptionsShorter: Show[Option[Int]] = showInts.contramap(_.getOrElse(0))

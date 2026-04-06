@@ -14,8 +14,10 @@ object InvariantFunctors {
     }
   }
 
-  def encrypt[A](value: A)(implicit crypto: Crypto[A]): String = crypto.encrypt(value)
-  def decrypt[A](repr: String)(implicit crypto: Crypto[A]): A = crypto.decrypt(repr)
+  def encrypt[A](value: A)(implicit crypto: Crypto[A]): String =
+    crypto.encrypt(value)
+  def decrypt[A](repr: String)(implicit crypto: Crypto[A]): A =
+    crypto.decrypt(repr)
 
   implicit val caesarCypher: Crypto[String] = new Crypto[String] {
     override def encrypt(value: String) = value.map(c => (c + 2).toChar)
@@ -25,23 +27,30 @@ object InvariantFunctors {
   /*
     How can we support ints, doubles, Option[String]?
    */
-  implicit val doubleCrypto: Crypto[Double] = caesarCypher.imap(_.toString, _.toDouble)
+  implicit val doubleCrypto: Crypto[Double] =
+    caesarCypher.imap(_.toString, _.toDouble)
 
   // TODO 1 - support Option[String]
-  implicit val optionStringCrypto: Crypto[Option[String]] = caesarCypher.imap(_.getOrElse(""), Option(_))
+  implicit val optionStringCrypto: Crypto[Option[String]] =
+    caesarCypher.imap(_.getOrElse(""), Option(_))
 
   // TODO 2 - if you have a Crypto[T] => Crypto[Option[T]] if you have a Monoid[T] in scope
-  implicit def optionCrypto[T](implicit crypto: Crypto[T], monoid: Monoid[T]): Crypto[Option[T]] =
+  implicit def optionCrypto[T](implicit
+      crypto: Crypto[T],
+      monoid: Monoid[T]
+  ): Crypto[Option[T]] =
     crypto.imap(_.getOrElse(monoid.empty), Option(_))
 
   import cats.Invariant
   import cats.Show
   import cats.instances.string._ // Show[String]
   val showString = Show[String]
-  val showOptionString: Show[Option[String]] = Invariant[Show].imap(showString)(Option(_))(_.getOrElse(""))
+  val showOptionString: Show[Option[String]] =
+    Invariant[Show].imap(showString)(Option(_))(_.getOrElse(""))
 
   import cats.syntax.invariant._
-  val showOptionString2: Show[Option[String]] = showString.imap(Option(_))(_.getOrElse("")) // identical
+  val showOptionString2: Show[Option[String]] =
+    showString.imap(Option(_))(_.getOrElse("")) // identical
 
   // TODO - what's the relationship?
   trait MyInvariant[W[_]] {

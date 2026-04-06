@@ -25,7 +25,8 @@ object Evaluation {
     53278
   }
 
-  val composedEvaluation = instantEval.flatMap(value1 => delayedEval.map(value2 => value1 + value2))
+  val composedEvaluation =
+    instantEval.flatMap(value1 => delayedEval.map(value2 => value1 + value2))
   val anotherComposedEvaluation = for {
     value1 <- instantEval
     value2 <- delayedEval
@@ -44,9 +45,14 @@ object Evaluation {
   val dontRecompute = redoEval.memoize
   val tutorial = Eval
     .always { println("Step 1..."); "put the guitar on your lap" }
-    .map { step1 => println("Step 2"); s"$step1 then put your left hand on the neck" }
+    .map { step1 =>
+      println("Step 2"); s"$step1 then put your left hand on the neck"
+    }
     .memoize // remember the value up to this point
-    .map { steps12 => println("Step 3, more complicated"); s"$steps12 then with the right hand strike the strings" }
+    .map { steps12 =>
+      println("Step 3, more complicated");
+      s"$steps12 then with the right hand strike the strings"
+    }
 
   // TODO 2: implement defer such that defer(Eval.now) does NOT run the side effects
   def defer[T](eval: => Eval[T]): Eval[T] =

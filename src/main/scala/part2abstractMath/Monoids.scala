@@ -26,8 +26,10 @@ object Monoids {
 
   import cats.instances.option._ // construct an implicit Monoid[Option[Int]]
   val emptyOption = Monoid[Option[Int]].empty // None
-  val combineOption = Monoid[Option[Int]].combine(Option(2), Option.empty[Int]) // Some(2)
-  val combineOption2 = Monoid[Option[Int]].combine(Option(3), Option(6)) // Some(8)
+  val combineOption =
+    Monoid[Option[Int]].combine(Option(2), Option.empty[Int]) // Some(2)
+  val combineOption2 =
+    Monoid[Option[Int]].combine(Option(3), Option(6)) // Some(8)
 
   // extension methods for Monoids - |+|
   // import cats.syntax.monoid._ // either this one or cats.syntax.semigroup._
@@ -67,15 +69,18 @@ object Monoids {
   def checkout(shoppingCarts: List[ShoppingCart]): ShoppingCart =
     combineFold(shoppingCarts)
 
-
   def main(args: Array[String]): Unit = {
     println(combineFold(numbers))
     println(combineFold(List("I ", "like ", "monoids")))
     println(massivePhonebook)
-    println(checkout(List(
-      ShoppingCart(List("iphone", "shoes"), 799),
-      ShoppingCart(List("TV"), 20000),
-      ShoppingCart(List(), 0)
-    )))
+    println(
+      checkout(
+        List(
+          ShoppingCart(List("iphone", "shoes"), 799),
+          ShoppingCart(List("TV"), 20000),
+          ShoppingCart(List(), 0)
+        )
+      )
+    )
   }
 }
